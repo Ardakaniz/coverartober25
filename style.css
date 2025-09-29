@@ -1,19 +1,80 @@
+@font-face {
+	font-family: "Ardakaniz";
+	src: url("fonts/Ardakaniz.ttf");
+}
+
+@font-face {
+	font-family: "Monaspace Xenon";
+	src: url("fonts/MonaspaceXenon-Regular.woff");
+}
+
+body {
+	background-color: #8661C1;
+	color: white;
+	font-family: "Monaspace Xenon";
+	width: fit-content;
+	max-width: 100%;
+	margin: 2.5% auto;
+}
+
+h1 {
+	text-align: center;
+	margin: 0;
+	font-size: 25pt;
+}
+
+.label {
+	font-family: "Ardakaniz";
+	font-size: 25pt;
+	display: block;
+	padding: 5px;
+}
+
+#play {
+	font-family: "Monaspace Xenon";
+	font-size: 10pt;
+	border: 0;
+	height: 45px;
+	text-align: right;
+	background-color: #8661C1;
+	color: white;
+}
+#play:hover {
+	color: #0D0628;
+}
+
+strong {
+	color: #0D0628;
+	font-weight: normal; 
+}
+.weak {
+	color: #b1a5c5;
+}
+
+em {
+	text-decoration: underline;
+}
+
+
 canvas { 
 	/* border:1px solid black;  */
-	/* image-rendering: pixelated; */
-	width: 128px;
-	height: 128px;
+	width: 256px;
+	height: 256px;
 	transition: box-shadow 0.3s ease, border-color 0.3s ease;
 	display: block;
 }
 
-canvas:hover {
-	border-color: #ffaa00;
-	box-shadow: 0 0 15px rgba(255, 170, 0, 0.7),
-		0 0 30px rgba(255, 170, 0, 0.4);
+.pixelated {
+	image-rendering: pixelated;
+}
+
+.hoverable:hover {
+	box-shadow: 0 0 15px rgba(255, 255, 255, 0.7), 0 0 30px rgba(200, 200, 200, 0.4);
 }
 
 .grid-container {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, 128px);
+	place-items: center;
+	grid-template-columns: repeat(auto-fit, 256px);
+	max-width: calc(4 * 256px);
 }
