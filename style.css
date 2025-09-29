@@ -29,6 +29,9 @@ h1 {
 	display: block;
 	padding: 5px;
 }
+.label:hover {
+	color: #0D0628;
+}
 
 #play {
 	font-family: "Monaspace Xenon";
@@ -37,10 +40,10 @@ h1 {
 	height: 45px;
 	text-align: right;
 	background-color: #8661C1;
-	color: white;
+	color: #0D0628;
 }
 #play:hover {
-	color: #0D0628;
+	color: white;
 }
 
 strong {
@@ -69,7 +72,7 @@ canvas {
 }
 
 .hoverable:hover {
-	box-shadow: 0 0 15px rgba(255, 255, 255, 0.7), 0 0 30px rgba(200, 200, 200, 0.4);
+	box-shadow: 0 0 15px #0D0628AA, 0 0 30px rgba(200, 200, 200, 0.4);
 }
 
 .grid-container {
