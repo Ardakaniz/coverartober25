@@ -22,7 +22,10 @@ async function setup() {
 		let cnv = document.getElementById(jour_name);
 		cnv.width = width;
 		cnv.height = height;
-		cnv.classList.add("hoverable")
+
+		if (jour_idx !== 0) {
+			cnv.classList.add("hoverable") // jour 0 is never hoverable
+		}
 
 		let audio = new Audio(`samples/${jour_name}.mp3`);
 		audio.loop = true;
@@ -34,7 +37,7 @@ async function setup() {
 			frame: 0
 		});
 
-		if (jour_name !== 0) {
+		if (jour_idx !== 0) {
 			fetch(`covers/${jour_name}.bin`)
 				.then(response => response.arrayBuffer())
 				.then(buffer => {
@@ -72,7 +75,7 @@ async function setup() {
 		}
 		else {
 			drawFrame(0,0);
-			cnv.addEventListener("click", () => {
+			document.getElementById("play").addEventListener("click", () => {
 				jours[0].audio.play();
 			});
 		}
