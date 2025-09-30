@@ -17,10 +17,24 @@ body {
 	margin: 2.5% auto;
 }
 
-h1 {
+h1, h5 {
 	text-align: center;
 	margin: 0;
+}
+
+h1 {
 	font-size: 25pt;
+}
+h5>* {
+	font-size: 8pt;
+}
+
+a {
+	color: #0D0628;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
 }
 
 .label {
@@ -35,12 +49,13 @@ h1 {
 
 #play {
 	font-family: "Monaspace Xenon";
-	font-size: 10pt;
+	font-size: 20pt;
 	border: 0;
-	height: 45px;
+	padding: 0;
 	text-align: right;
 	background-color: #8661C1;
 	color: #0D0628;
+	cursor: pointer;
 }
 #play:hover {
 	color: white;
@@ -58,9 +73,7 @@ em {
 	text-decoration: underline;
 }
 
-
 canvas { 
-	/* border:1px solid black;  */
 	width: 256px;
 	height: 256px;
 	transition: box-shadow 0.3s ease, border-color 0.3s ease;

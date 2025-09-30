@@ -4,6 +4,13 @@ const CURRENT_JOUR = 0;
 let colormaps = {};
 let jour_configs;
 let jours = [];
+let num_playing = 0;
+let synced_audio = {
+	handles: [],
+	num_ended: 0,
+	pending: 0
+};
+
 async function setup() {
 	colormaps["magma"] = await fetch("colormaps/magma.json").then(response => response.json());
 	colormaps["twilight_shifted"] = await fetch("colormaps/twilight_shifted.json").then(response => response.json());
@@ -23,12 +30,36 @@ async function setup() {
 		cnv.width = width;
 		cnv.height = height;
 
-		if (jour_idx !== 0) {
-			cnv.classList.add("hoverable") // jour 0 is never hoverable
+		let audio;
+		if (jour_idx === 0) {
+			audio = [];
+			for (let i = 0; i < CURRENT_JOUR+1; i++) {
+				let cur_audio = new Audio("samples/J0.mp3");
+				cur_audio.loop = true;
+				audio.push(cur_audio);
+			}
+		}
+		else {
+			audio = new Audio(`samples/${jour_name}.mp3`);
+
+			if (jour_configs[jour_idx].sync !== true) {
+				audio.loop = true;
+			}
+			else {
+				audio.addEventListener("ended", () => {
+					this.currentTime = 0;
+
+					synced_audio.num_ended++;
+
+					if (synced_audio.num_ended >= synced_audio.handles.length - synced_audio.pending) {
+						synced_audio.handles.forEach(x => x.play());
+						synced_audio.num_ended = 0;
+						synced_audio.pending = 0;
+					}
+				});
+			}
 		}
 
-		let audio = new Audio(`samples/${jour_name}.mp3`);
-		audio.loop = true;
 
 		jours.push({
 			ctx: cnv.getContext("2d"),
@@ -67,17 +98,48 @@ async function setup() {
 					drawFrame(jour_idx, jour_configs[jour_idx].base_frame);
 
 					cnv.addEventListener("click", () => {
+						if (num_playing > 0) {
+							num_playing++;
+							jours[0].audio.forEach(audio => audio.volume = Math.sqrt(1.0/num_playing));
+							jours[0].audio[jour_idx].play();
+
+							if (jour_configs[jour_idx].sync) {
+								synced_audio.handles.push(jours[jour_idx].audio);
+
+								// If no sound is waiting to be played, play this one
+								if (synced_audio.pending === 0)
+									jours[jour_idx].audio.play();
+
+								synced_audio.pending++;
+							}
+							else {
 						jours[jour_idx].audio.play();
+							}
+
 						animate(jour_idx);
+						}
 					});
 				})
 				.catch(() => {});
 		}
 		else {
 			drawFrame(0,0);
-			document.getElementById("play").addEventListener("click", () => {
-				jours[0].audio.play();
-			});
+			const play_el = document.getElementById("play");
+
+			const play_cb = () => {
+				jours[0].audio[0].play();
+				play_el.style.color = "white";
+
+				num_playing = 1;
+
+				for (let i = 1; i < CURRENT_JOUR + 1; i++) {
+					document.getElementById(`J${i}`).classList.add("hoverable")
+				}
+
+				play_el.removeEventListener("click", play_cb)
+			}
+			
+			play_el.addEventListener("click", play_cb);
 		}
 	}
 }
