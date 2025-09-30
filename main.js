@@ -4,7 +4,9 @@ const CURRENT_JOUR = 0;
 let colormaps = {};
 let jour_configs;
 let jours = [];
-let num_playing = 0;
+let anim_frame = 0;
+let started = false;
+let playing_idxs = [];
 let synced_audio = {
 	handles: [],
 	num_ended: 0,
@@ -30,6 +32,7 @@ async function setup() {
 		cnv.width = width;
 		cnv.height = height;
 
+		//// AUDIO SETUP ////
 		let audio;
 		if (jour_idx === 0) {
 			audio = [];
@@ -59,7 +62,7 @@ async function setup() {
 				});
 			}
 		}
-
+		////  ////
 
 		jours.push({
 			ctx: cnv.getContext("2d"),
@@ -68,7 +71,26 @@ async function setup() {
 			frame: 0
 		});
 
-		if (jour_idx !== 0) {
+		//// COVER SETUP ////
+		if (jour_idx === 0) {
+			drawFrame(0,0);
+			const play_el = document.getElementById("play");
+
+			const play_cb = () => {
+				jours[0].audio[0].play();
+				play_el.style.color = "white";
+
+				started = true;
+
+				for (let i = 1; i < CURRENT_JOUR + 1; i++) {
+					document.getElementById(`J${i}`).classList.add("hoverable")
+				}
+
+				play_el.removeEventListener("click", play_cb)
+			}
+			play_el.addEventListener("click", play_cb);
+		}
+		else {
 			fetch(`covers/${jour_name}.bin`)
 				.then(response => response.arrayBuffer())
 				.then(buffer => {
@@ -97,10 +119,14 @@ async function setup() {
 
 					drawFrame(jour_idx, jour_configs[jour_idx].base_frame);
 
-					cnv.addEventListener("click", () => {
-						if (num_playing > 0) {
-							num_playing++;
-							jours[0].audio.forEach(audio => audio.volume = Math.sqrt(1.0/num_playing));
+					const click_cb = () => {
+						if (started) {
+							if (playing_idxs.length === 0)
+								anim_frame = 0;
+
+							playing_idxs.push(jour_idx);
+
+							jours[0].audio.forEach(audio => audio.volume = Math.sqrt(1.0/playing_idxs.length));
 							jours[0].audio[jour_idx].play();
 
 							if (jour_configs[jour_idx].sync) {
@@ -116,32 +142,18 @@ async function setup() {
 						jours[jour_idx].audio.play();
 							}
 
-						animate(jour_idx);
+							cnv.classList.remove("hoverable")
+							cnv.removeEventListener("click", click_cb);
 						}
-					});
+					};
+					cnv.addEventListener("click", click_cb);
 				})
 				.catch(() => {});
 		}
-		else {
-			drawFrame(0,0);
-			const play_el = document.getElementById("play");
-
-			const play_cb = () => {
-				jours[0].audio[0].play();
-				play_el.style.color = "white";
-
-				num_playing = 1;
-
-				for (let i = 1; i < CURRENT_JOUR + 1; i++) {
-					document.getElementById(`J${i}`).classList.add("hoverable")
-				}
-
-				play_el.removeEventListener("click", play_cb)
-			}
-			
-			play_el.addEventListener("click", play_cb);
-		}
+		//// ////
 	}
+
+	animate();
 }
 
 function drawFrame(jour_idx, frame_idx) {
@@ -168,16 +180,13 @@ function drawFrame(jour_idx, frame_idx) {
 	jours[jour_idx].ctx.putImageData(image_data, 0, 0);
 }
 
-function animate(jour_idx) {
-	const frame = jours[jour_idx].frame;
-	if (frame >= sample_count) {
-		drawFrame(jour_idx, 2 * sample_count - 2 - frame);
-	}
-	else {
-		drawFrame(jour_idx, frame);
-	}
-	jours[jour_idx].frame = (frame + 1) % (2*sample_count - 1);
-	setTimeout(() => animate(jour_idx), 1/15*1000);
+function animate() {
+	let img_idx = (anim_frame >= sample_count) ? 2 * sample_count - 2 - anim_frame : anim_frame;
+
+	playing_idxs.forEach(x => drawFrame(x, img_idx));
+
+	anim_frame = (anim_frame + 1) % (2*sample_count - 1);
+	setTimeout(() => animate(), 1/15*1000);
 }
 
 setup();
