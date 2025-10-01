@@ -35,9 +35,14 @@ async function setup() {
 		//// AUDIO SETUP ////
 		let audio;
 		if (jour_idx === 0) {
+			const audio_j0_bloburl = 
+				await fetch("samples/J0.mp3")
+					.then(response => response.blob())
+					.then(URL.createObjectURL);
+
 			audio = [];
 			for (let i = 0; i < CURRENT_JOUR+1; i++) {
-				let cur_audio = new Audio("samples/J0.mp3");
+				let cur_audio = new Audio(audio_j0_bloburl);
 				cur_audio.loop = true;
 				audio.push(cur_audio);
 			}
