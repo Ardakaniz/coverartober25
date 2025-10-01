@@ -1,5 +1,5 @@
 const width = 128, height = 128, sample_count = 66; // match Python
-const CURRENT_JOUR = 0;
+const CURRENT_JOUR = 1;
 
 let colormaps = {};
 let jour_configs;
@@ -139,7 +139,7 @@ async function setup() {
 								synced_audio.pending++;
 							}
 							else {
-						jours[jour_idx].audio.play();
+								jours[jour_idx].audio.play();
 							}
 
 							cnv.classList.remove("hoverable")
