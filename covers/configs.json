@@ -3,187 +3,156 @@
 	{
 		"base_frame": 18,
 		"cm": "hsv",
-		"force_cycle": true,
-		"sync": false
+		"force_cycle": true
 	},
 	{
 		"base_frame": 42,
 		"cm": "twilight_shifted",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 20,
 		"cm": "Blues_r",
-		"force_cycle": true,
-		"sync": false
+		"force_cycle": true
 	},
 	{
 		"base_frame": 20,
 		"cm": "magma",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 20,
 		"cm": "Blues_r",
-		"force_cycle": true,
-		"sync": false
+		"force_cycle": true
 	},
 	{
 		"base_frame": 35,
 		"cm": "viridis",
-		"force_cycle": true,
-		"sync": false
+		"force_cycle": true
 	},
 	{
 		"base_frame": 45,
 		"cm": "twilight_shifted",
-		"force_cycle": true,
-		"sync": false
+		"force_cycle": true
 	},
 	{
 		"base_frame": 20,
 		"cm": "Blues_r",
-		"force_cycle": true,
-		"sync": false
+		"force_cycle": true
 	},
 	{
 		"base_frame": 20,
 		"cm": "Blues_r",
-		"force_cycle": true,
-		"sync": false
+		"force_cycle": true
 	},
 	{
 		"base_frame": 20,
 		"cm": "Blues_r",
-		"force_cycle": true,
-		"sync": false
+		"force_cycle": true
 	},
 	{
 		"base_frame": 20,
 		"cm": "Blues_r",
-		"force_cycle": true,
-		"sync": false
+		"force_cycle": true
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 20,
 		"cm": "magma",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "copper",
-		"force_cycle": true,
-		"sync": false
+		"force_cycle": true
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	},
 	{
 		"base_frame": 50,
 		"cm": "Purples",
-		"force_cycle": false,
-		"sync": false
+		"force_cycle": false
 	}
 ]

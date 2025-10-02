@@ -1,5 +1,37 @@
 const width = 128, height = 128, sample_count = 66; // match Python
-const CURRENT_JOUR = 2;
+const JOUR_LABELS = [
+	"digital playground",
+	"Calin",
+	"blue lightning",
+	"SUNKISSED",
+	"azerty",
+	"UnisOn",
+	"NeonBloodRace",
+	"ALL star",
+	"Pommefreche",
+	"Xoxo Baby Velour",
+	"lunes furiosoooOO",
+	"Purple Ash",
+	"...",
+	"Aurore",
+	"ENOCHIAN",
+	"one percent",
+	"Kernel panic",
+	"DCIM",
+	"six nine kelvin",
+	"Baby steps",
+	"sang brulure sel",
+	"angel edge",
+	"dress to depress",
+	"today is for me",
+	"Chii elixir",
+	"threesix gambling sq",
+	"RERERE",
+	"...",
+	"DSM said ; ASD cues",
+	"crackheart",
+	"i still love u"
+]
 
 let colormaps = {};
 let jour_configs;
@@ -7,11 +39,25 @@ let jours = [];
 let anim_frame = 0;
 let started = false;
 let playing_idxs = [];
-let synced_audio = {
-	handles: [],
-	num_ended: 0,
-	pending: 0
-};
+
+function setup_dom() {
+	const grid = document.querySelector(".grid-container");
+	for (let i = 0; i < JOUR_LABELS.length; i++) {
+		const node = document.createElement("div")
+		node.classList.add("grid-item");
+
+		const label = document.createElement("span");
+		label.classList.add("label");
+		label.innerText = JOUR_LABELS[i];
+		node.appendChild(label);
+
+		const cnv = document.createElement("canvas");
+		cnv.id = `J${i+1}`;
+		node.appendChild(cnv);
+
+		grid.appendChild(node);
+	}
+}
 
 async function setup() {
 	colormaps["magma"] = await fetch("colormaps/magma.json").then(response => response.json());
@@ -49,6 +95,9 @@ async function setup() {
 
 				started = true;
 
+				if ("mediaSession" in navigator) 
+					navigator.mediaSession.playbackState = "playing";
+
 				for (let i = 1; i < CURRENT_JOUR + 1; i++) {
 					document.getElementById(`J${i}`).parentNode.classList.add("activable");
 				}
@@ -68,6 +117,9 @@ async function setup() {
 			cnv.width = width;
 			cnv.height = height;
 			cnv.parentNode.classList.add("enabled");
+
+			if ("pixelated" in jour_configs[jour_idx] && jour_configs[jour_idx]["pixelated"])
+				cnv.classList.add("pixelated");
 
 			let audio = new Audio(`samples/${jour_name}.mp3`);
 			audio.loop = true;
@@ -115,19 +167,10 @@ async function setup() {
 
 							jours[0].audio.forEach(audio => audio.volume = Math.sqrt(1.0/playing_idxs.length));
 							jours[0].audio[jour_idx].play();
-
-							if (jour_configs[jour_idx].sync) {
-								synced_audio.handles.push(jours[jour_idx].audio);
-
-								// If no sound is waiting to be played, play this one
-								if (synced_audio.pending === 0)
 									jours[jour_idx].audio.play();
 
-								synced_audio.pending++;
-							}
-							else {
-								jours[jour_idx].audio.play();
-							}
+							if ("mediaSession" in navigator)
+								navigator.mediaSession.metadata.title = playing_idxs.map(i => JOUR_LABELS[i]).join(" | ");
 
 							cnv.parentNode.classList.remove("activable")
 							cnv.parentNode.classList.add("activated")
@@ -144,6 +187,33 @@ async function setup() {
 	}
 
 	animate();
+
+	if ("mediaSession" in navigator) {
+		navigator.mediaSession.metadata = new MediaMetadata({
+			title: " - ",
+			artist: "Irrational",
+			album: "Coverartober 2025",
+		});
+
+		navigator.mediaSession.setActionHandler("play", () => {
+			navigator.mediaSession.playbackState = "playing";
+
+			jours[0].audio[0].play();
+			playing_idxs.forEach(x => {
+				jours[0].audio[x].play();
+				jours[x].audio.play();
+			});
+		});
+		navigator.mediaSession.setActionHandler("pause", () => {
+			navigator.mediaSession.playbackState = "paused";
+
+			jours[0].audio[0].pause();
+			playing_idxs.forEach(x => {
+				jours[0].audio[x].pause();
+				jours[x].audio.pause();
+			});
+		});
+	}
 }
 
 function drawFrame(jour_idx, frame_idx) {
