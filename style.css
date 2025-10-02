@@ -41,8 +41,11 @@ a:hover {
 	padding: 10px;
 	font-size: 9pt;
 	overflow-y: scroll;
-	scrollbar-color: #b1a5c5 #433160;
-	scrollbar-width: thin;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+#about::-webkit-scrollbar { 
+    display: none;
 }
 #about > p {
 	margin: 10px 0;

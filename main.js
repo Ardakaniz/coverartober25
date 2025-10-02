@@ -170,8 +170,15 @@ async function setup() {
 							jours[0].audio[jour_idx].play();
 							jours[jour_idx].audio.play();
 
-							if ("mediaSession" in navigator)
-								navigator.mediaSession.metadata.title = playing_idxs.map(i => JOUR_LABELS[i]).join(" | ");
+							if ("mediaSession" in navigator) {
+								const mdata = navigator.mediaSession.metadata;
+								navigator.mediaSession.metadata = new MediaMetadata({
+									title: playing_idxs.map(i => JOUR_LABELS[i-1]).join(" | "),
+									album: mdata.album,
+									artist: mdata.artist,
+									artwork: mdata.artwork,
+								});
+							}
 
 							cnv.parentNode.classList.remove("activable")
 							cnv.parentNode.classList.add("activated")
