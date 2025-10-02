@@ -1,5 +1,5 @@
 const width = 128, height = 128, sample_count = 66; // match Python
-const CURRENT_JOUR = 1;
+const CURRENT_JOUR = 2;
 
 let colormaps = {};
 let jour_configs;
