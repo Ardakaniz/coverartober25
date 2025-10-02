@@ -5,7 +5,7 @@ const JOUR_LABELS = [
 	"Calin",
 	"blue lightning",
 	"SUNKISSED",
-	"azerty",
+	"azerty vitamin",
 	"UnisOn",
 	"NeonBloodRace",
 	"ALL star",
