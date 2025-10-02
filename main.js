@@ -28,74 +28,56 @@ async function setup() {
 
 	for (let jour_idx = 0; jour_idx < CURRENT_JOUR+1; jour_idx++) {
 		const jour_name = `J${jour_idx}`;
-		let cnv = document.getElementById(jour_name);
-		cnv.width = width;
-		cnv.height = height;
-
-		//// AUDIO SETUP ////
-		let audio;
+		
 		if (jour_idx === 0) {
 			const audio_j0_bloburl = 
 				await fetch("samples/J0.mp3")
 					.then(response => response.blob())
 					.then(URL.createObjectURL);
 
-			audio = [];
+			let audio = [];
 			for (let i = 0; i < CURRENT_JOUR+1; i++) {
 				let cur_audio = new Audio(audio_j0_bloburl);
 				cur_audio.loop = true;
 				audio.push(cur_audio);
 			}
-		}
-		else {
-			audio = new Audio(`samples/${jour_name}.mp3`);
 
-			if (jour_configs[jour_idx].sync !== true) {
-				audio.loop = true;
-			}
-			else {
-				audio.addEventListener("ended", () => {
-					this.currentTime = 0;
-
-					synced_audio.num_ended++;
-
-					if (synced_audio.num_ended >= synced_audio.handles.length - synced_audio.pending) {
-						synced_audio.handles.forEach(x => x.play());
-						synced_audio.num_ended = 0;
-						synced_audio.pending = 0;
-					}
-				});
-			}
-		}
-		////  ////
-
-		jours.push({
-			ctx: cnv.getContext("2d"),
-			px_data: [],
-			audio: audio,
-			frame: 0
-		});
-
-		//// COVER SETUP ////
-		if (jour_idx === 0) {
-			drawFrame(0,0);
 			const play_el = document.getElementById("play");
 
 			const play_cb = () => {
 				jours[0].audio[0].play();
-				play_el.style.color = "white";
 
 				started = true;
 
 				for (let i = 1; i < CURRENT_JOUR + 1; i++) {
-					document.getElementById(`J${i}`).classList.add("hoverable")
+					document.getElementById(`J${i}`).parentNode.classList.add("activable");
 				}
 
 				play_el.removeEventListener("click", play_cb)
 			}
 			play_el.addEventListener("click", play_cb);
+
+			jours.push({
+				ctx: null,
+				px_data: [],
+				audio: audio,
+			});
 		}
 		else {
+			let cnv = document.getElementById(jour_name);
+			cnv.width = width;
+			cnv.height = height;
+			cnv.parentNode.classList.add("enabled");
+
+			let audio = new Audio(`samples/${jour_name}.mp3`);
+			audio.loop = true;
+
+			jours.push({
+				ctx: cnv.getContext("2d"),
+				px_data: [],
+				audio: audio,
+			});
+
 			fetch(`covers/${jour_name}.bin`)
 				.then(response => response.arrayBuffer())
 				.then(buffer => {
@@ -147,11 +129,14 @@ async function setup() {
 								jours[jour_idx].audio.play();
 							}
 
-							cnv.classList.remove("hoverable")
+							cnv.parentNode.classList.remove("activable")
+							cnv.parentNode.classList.add("activated")
 							cnv.removeEventListener("click", click_cb);
+							cnv.previousSibling.removeEventListener("click", click_cb);
 						}
 					};
 					cnv.addEventListener("click", click_cb);
+					cnv.previousSibling.addEventListener("click", click_cb);
 				})
 				.catch(() => {});
 		}
@@ -163,7 +148,7 @@ async function setup() {
 
 function drawFrame(jour_idx, frame_idx) {
 	if (jour_idx == 0) {
-		jours[0].ctx.fillStyle = "#8661C1";
+		jours[0].ctx.fillStyle = "#433160";
 		jours[0].ctx.fillRect(0,0,width,height);
 		return;
 	}
