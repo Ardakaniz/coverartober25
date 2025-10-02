@@ -29,17 +29,23 @@ h5 {
 
 a {
 	color: #9a78d0;
-	text-decoration: none;
+	text-decoration: underline;
 }
 a:hover {
-	text-decoration: underline;
+	text-decoration: none;
 }
 
 #about {
 	width: 256px;
 	height: 256px;
 	padding: 10px;
-	font-size: 10pt;
+	font-size: 9pt;
+	overflow-y: scroll;
+	scrollbar-color: #b1a5c5 #433160;
+	scrollbar-width: thin;
+}
+#about > p {
+	margin: 10px 0;
 }
 
 #play, #play::before {
@@ -56,12 +62,13 @@ strong {
 	color: #9a78d0;
 	font-weight: normal; 
 }
-.weak {
+em {
 	color: #b1a5c5;
+	font-style: normal;
 }
 
-em {
-	text-decoration: underline;
+.discrete-a {
+	color: white;
 }
 
 canvas { 
