@@ -1,4 +1,5 @@
 const width = 128, height = 128, sample_count = 66; // match Python
+const CURRENT_JOUR = 2;
 const JOUR_LABELS = [
 	"digital playground",
 	"Calin",
@@ -167,7 +168,7 @@ async function setup() {
 
 							jours[0].audio.forEach(audio => audio.volume = Math.sqrt(1.0/playing_idxs.length));
 							jours[0].audio[jour_idx].play();
-									jours[jour_idx].audio.play();
+							jours[jour_idx].audio.play();
 
 							if ("mediaSession" in navigator)
 								navigator.mediaSession.metadata.title = playing_idxs.map(i => JOUR_LABELS[i]).join(" | ");
@@ -249,4 +250,11 @@ function animate() {
 	setTimeout(() => animate(), 1/15*1000);
 }
 
+function toggle_audio(audio) {
+	console.log(audio);
+	if (audio.paused) audio.play();
+	else audio.pause();
+};
+
+setup_dom();
 setup();
