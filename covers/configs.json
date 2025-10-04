@@ -16,9 +16,10 @@
 		"force_cycle": true
 	},
 	{
-		"base_frame": 20,
+		"base_frame": 26,
 		"cm": "magma",
-		"force_cycle": false
+		"force_cycle": true,
+		"pixelated": true
 	},
 	{
 		"base_frame": 20,
