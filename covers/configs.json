@@ -22,9 +22,10 @@
 		"pixelated": true
 	},
 	{
-		"base_frame": 20,
-		"cm": "Blues_r",
-		"force_cycle": true
+		"base_frame": 62,
+		"cm": "summer",
+		"force_cycle": true,
+		"pixelated": true
 	},
 	{
 		"base_frame": 35,
