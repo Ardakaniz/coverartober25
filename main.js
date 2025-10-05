@@ -34,7 +34,7 @@ const JOUR_LABELS = [
 	"i still love u"
 ]
 
-let colormaps = {};
+let colormaps = ["magma","twilight_shifted","hsv","Purples","Blues","Blues_r","Greys","cividis","copper","viridis","winter","summer"];
 let jour_configs;
 let jours = [];
 let anim_frame = 0;
@@ -61,16 +61,14 @@ function setup_dom() {
 }
 
 async function setup() {
-	colormaps["magma"] = await fetch("colormaps/magma.json").then(response => response.json());
-	colormaps["twilight_shifted"] = await fetch("colormaps/twilight_shifted.json").then(response => response.json());
-	colormaps["hsv"] = await fetch("colormaps/hsv.json").then(response => response.json());
-	colormaps["Purples"] = await fetch("colormaps/Purples.json").then(response => response.json());
-	colormaps["Blues"] = await fetch("colormaps/Blues.json").then(response => response.json());
-	colormaps["Blues_r"] = await fetch("colormaps/Blues_r.json").then(response => response.json());
-	colormaps["Greys"] = await fetch("colormaps/Greys.json").then(response => response.json());
-	colormaps["cividis"] = await fetch("colormaps/cividis.json").then(response => response.json());
-	colormaps["copper"] = await fetch("colormaps/copper.json").then(response => response.json());
-	colormaps["viridis"] = await fetch("colormaps/viridis.json").then(response => response.json());
+	colormaps = Object.fromEntries(
+		await Promise.all(
+			colormaps.map(async (x) => [
+				x,
+				await fetch(`colormaps/${x}.json`).then((r) => r.json())
+			])
+		)
+	);
 	jour_configs = await fetch("covers/configs.json").then(response => response.json());
 
 	for (let jour_idx = 0; jour_idx < CURRENT_JOUR+1; jour_idx++) {
@@ -125,8 +123,14 @@ async function setup() {
 			let audio = new Audio(`samples/${jour_name}.mp3`);
 			audio.loop = true;
 
+			const ctx = cnv.getContext("2d");
+			let img_data = ctx.createImageData(width, height);
+			for (let i = 3; i < img_data.data.length; i += 4)
+				img_data.data[i] = 255;
+
 			jours.push({
-				ctx: cnv.getContext("2d"),
+				ctx: ctx,
+				img_data: img_data,
 				px_data: [],
 				audio: audio,
 			});
@@ -225,27 +229,19 @@ async function setup() {
 }
 
 function drawFrame(jour_idx, frame_idx) {
-	if (jour_idx == 0) {
-		jours[0].ctx.fillStyle = "#433160";
-		jours[0].ctx.fillRect(0,0,width,height);
-		return;
-	}
-
-	const image_data = jours[jour_idx].ctx.createImageData(width, height);
-
+	const jour = jours[jour_idx];
 	for (let y = 0; y < height; y++) {
 		for (let x = 0; x < width; x++) {
-			const px = jours[jour_idx].px_data[y][x][frame_idx];
+			const px = jour.px_data[y][x][frame_idx];
 			const [r,g,b] = colormaps[jour_configs[jour_idx].cm][px];
 			const index = (y*width + x)*4;
-			image_data.data[index+0] = r;
-			image_data.data[index+1] = g;
-			image_data.data[index+2] = b;
-			image_data.data[index+3] = 255;
+			jour.img_data.data[index+0] = r;
+			jour.img_data.data[index+1] = g;
+			jour.img_data.data[index+2] = b;
 		}
 	}
 
-	jours[jour_idx].ctx.putImageData(image_data, 0, 0);
+	jour.ctx.putImageData(jour.img_data, 0, 0);
 }
 
 function animate() {
