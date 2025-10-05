@@ -114,6 +114,13 @@ canvas {
 	color: #b1a5c5;
 }
 
+.activable>canvas {
+	opacity: 60%;
+}
+.activated>canvas {
+	opacity: 100%;
+}
+
 .grid-wrapper {
 	display: flex;
 	justify-content: center;
