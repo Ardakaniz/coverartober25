@@ -28,9 +28,10 @@
 		"pixelated": true
 	},
 	{
-		"base_frame": 35,
+		"base_frame": 2,
 		"cm": "viridis",
-		"force_cycle": true
+		"force_cycle": false,
+		"pixelated": true
 	},
 	{
 		"base_frame": 45,
