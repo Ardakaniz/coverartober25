@@ -177,7 +177,7 @@ async function setup() {
 							if ("mediaSession" in navigator) {
 								const mdata = navigator.mediaSession.metadata;
 								navigator.mediaSession.metadata = new MediaMetadata({
-									title: playing_idxs.map(i => JOUR_LABELS[i-1]).join(" | "),
+									title: parseInt(playing_idxs.join("")).toString(16),
 									album: mdata.album,
 									artist: mdata.artist,
 									artwork: mdata.artwork,
