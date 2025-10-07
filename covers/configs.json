@@ -34,9 +34,10 @@
 		"pixelated": true
 	},
 	{
-		"base_frame": 45,
+		"base_frame": 50,
 		"cm": "twilight_shifted",
-		"force_cycle": true
+		"force_cycle": true,
+		"pixelated": true
 	},
 	{
 		"base_frame": 20,
