@@ -123,6 +123,12 @@ async function setup() {
 			let audio = new Audio(`samples/${jour_name}.mp3`);
 			audio.loop = true;
 
+			let audio_start = null;
+			if ("has_start" in jour_configs[jour_idx] && jour_configs[jour_idx]["has_start"]) {
+				audio_start = new Audio(`samples/${jour_name}_start.mp3`);
+				audio_start.addEventListener("ended", () => audio.play());
+			}
+
 			const ctx = cnv.getContext("2d");
 			let img_data = ctx.createImageData(width, height);
 			for (let i = 3; i < img_data.data.length; i += 4)
@@ -172,7 +178,9 @@ async function setup() {
 
 							jours[0].audio.forEach(audio => audio.volume = Math.sqrt(1.0/playing_idxs.length));
 							jours[0].audio[jour_idx].play();
-							jours[jour_idx].audio.play();
+
+							if (audio_start !== null) audio_start.play();
+							else audio.play();
 
 							if ("mediaSession" in navigator) {
 								const mdata = navigator.mediaSession.metadata;
