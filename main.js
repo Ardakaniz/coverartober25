@@ -1,5 +1,5 @@
 const width = 128, height = 128, sample_count = 66; // match Python
-const CURRENT_JOUR = 8;
+const CURRENT_JOUR = 9;
 const JOUR_LABELS = [
 	"digital playground",
 	"Calin",
@@ -34,7 +34,7 @@ const JOUR_LABELS = [
 	"i still love u"
 ]
 
-let colormaps = ["magma","twilight_shifted","hsv","Purples","Blues","Blues_r","Greys","cividis","copper","viridis","winter","summer"];
+let colormaps = ["hot","Spectral","magma","twilight_shifted","hsv","Purples","Purples_r","Greens","Blues","Blues_r","Greys","cividis","copper","viridis","winter","summer"];
 let jour_configs;
 let jours = [];
 let anim_frame = 0;
@@ -176,7 +176,7 @@ async function setup() {
 
 							playing_idxs.push(jour_idx);
 
-							jours[0].audio.forEach(audio => audio.volume = Math.sqrt(1.0/playing_idxs.length));
+							jours[0].audio.forEach(audio => audio.volume = Math.pow(1.0/playing_idxs.length, 1/2.5));
 							jours[0].audio[jour_idx].play();
 
 							if (audio_start !== null) audio_start.play();
