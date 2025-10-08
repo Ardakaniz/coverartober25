@@ -40,9 +40,10 @@
 		"pixelated": true
 	},
 	{
-		"base_frame": 20,
+		"base_frame": 32,
 		"cm": "Blues_r",
-		"force_cycle": true
+		"force_cycle": true,
+		"pixelated": true
 	},
 	{
 		"base_frame": 20,
