@@ -75,41 +75,40 @@ async function setup() {
 		const jour_name = `J${jour_idx}`;
 		
 		if (jour_idx === 0) {
-			const audio_j0_bloburl = 
-				await fetch("samples/J0.mp3")
-					.then(response => response.blob())
-					.then(URL.createObjectURL);
-
-			let audio = [];
-			for (let i = 0; i < CURRENT_JOUR+1; i++) {
-				let cur_audio = new Audio(audio_j0_bloburl);
-				cur_audio.loop = true;
-				audio.push(cur_audio);
-			}
-
-			const play_el = document.getElementById("play");
-
-			const play_cb = () => {
-				jours[0].audio[0].play();
-
-				started = true;
-
-				if ("mediaSession" in navigator) 
-					navigator.mediaSession.playbackState = "playing";
-
-				for (let i = 1; i < CURRENT_JOUR + 1; i++) {
-					document.getElementById(`J${i}`).parentNode.classList.add("activable");
-				}
-
-				play_el.removeEventListener("click", play_cb)
-			}
-			play_el.addEventListener("click", play_cb);
-
 			jours.push({
 				ctx: null,
 				px_data: [],
-				audio: audio,
+				audio: [],
 			});
+
+			fetch("samples/J0.mp3")
+				.then(response => response.blob())
+				.then(URL.createObjectURL)
+				.then(audio_bloburl => {
+					for (let i = 0; i < CURRENT_JOUR+1; i++) {
+						let cur_audio = new Audio(audio_bloburl);
+						cur_audio.loop = true;
+						jours[0].audio.push(cur_audio);
+					}
+
+					const play_el = document.getElementById("play");
+
+					const play_cb = () => {
+						jours[0].audio[0].play();
+
+						started = true;
+
+						if ("mediaSession" in navigator) 
+							navigator.mediaSession.playbackState = "playing";
+
+						for (let i = 1; i < CURRENT_JOUR + 1; i++) {
+							document.getElementById(`J${i}`).parentNode.classList.add("activable");
+						}
+
+						play_el.removeEventListener("click", play_cb)
+					}
+					play_el.addEventListener("click", play_cb);
+				});
 		}
 		else {
 			let cnv = document.getElementById(jour_name);
