@@ -1,5 +1,5 @@
 const width = 128, height = 128, sample_count = 66; // match Python
-const CURRENT_JOUR = 9;
+const CURRENT_JOUR = 10;
 const JOUR_LABELS = [
 	"digital playground",
 	"Calin",
