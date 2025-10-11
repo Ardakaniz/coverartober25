@@ -57,9 +57,10 @@
 		"force_cycle": true
 	},
 	{
-		"base_frame": 20,
-		"cm": "Blues_r",
-		"force_cycle": true
+		"base_frame": 54,
+		"cm": "Greys",
+		"force_cycle": true,
+		"pixelated": true
 	},
 	{
 		"base_frame": 50,
