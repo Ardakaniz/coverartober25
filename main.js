@@ -219,7 +219,7 @@ async function setup() {
 						}
 					};
 					cnv.addEventListener("click", click_cb);
-					cnv.previousSibling.addEventListener("click", click_cb);
+					document.querySelector("#" + jour_name + ">span").addEventListener("click", click_cb);
 				})
 				.catch(() => {});
 		}
