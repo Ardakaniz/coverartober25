@@ -63,14 +63,16 @@
 		"pixelated": true
 	},
 	{
-		"base_frame": 50,
-		"cm": "Purples",
-		"force_cycle": false
+		"base_frame": 49,
+		"cm": "RdPu",
+		"force_cycle": false,
+		"pixelated": true
 	},
 	{
-		"base_frame": 50,
-		"cm": "Purples",
-		"force_cycle": false
+		"base_frame": 15,
+		"cm": "twilight_shifted",
+		"force_cycle": true,
+		"pixelated": true
 	},
 	{
 		"base_frame": 50,
@@ -118,9 +120,10 @@
 		"force_cycle": true
 	},
 	{
-		"base_frame": 50,
-		"cm": "Purples",
-		"force_cycle": false
+		"base_frame": 43,
+		"cm": "Pastel2",
+		"force_cycle": false,
+		"pixelated": true
 	},
 	{
 		"base_frame": 50,
