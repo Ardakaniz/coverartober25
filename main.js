@@ -1,5 +1,5 @@
 const width = 128, height = 128, sample_count = 66; // match Python
-const CURRENT_JOUR = 11;
+const CURRENT_JOUR = 12;
 const JOUR_LABELS = [
 	"digital playground",
 	"Calin",
@@ -13,7 +13,7 @@ const JOUR_LABELS = [
 	"Xoxo Baby Velour",
 	"lunes furiosoooOO",
 	"Purple Ash",
-	"...",
+	"うずまき ⁠๑",
 	"Aurore",
 	"ENOCHIAN",
 	"one percent",
@@ -28,13 +28,13 @@ const JOUR_LABELS = [
 	"Chii elixir",
 	"threesix gambling sq",
 	"RERERE",
-	"...",
+	"где Надежда",
 	"DSM said ; ASD cues",
 	"crackheart",
 	"i still love u"
 ]
 
-let colormaps = ["hot","Spectral","magma","twilight_shifted","hsv","Purples","Purples_r","Greens","Blues","Blues_r","Greys","cividis","copper","viridis","winter","summer"];
+let colormaps = ["PRGn","PuOr","RdPu","Pastel2","hot","Spectral","magma","twilight_shifted","hsv","Purples","Purples_r","Greens","Blues","Blues_r","Greys","cividis","copper","viridis","winter","summer"];
 let jour_configs;
 let jours = [];
 let anim_frame = 0;
@@ -45,6 +45,7 @@ function setup_dom() {
 	const grid = document.querySelector(".grid-container");
 	for (let i = 0; i < JOUR_LABELS.length; i++) {
 		const node = document.createElement("div")
+		node.id = `J${i+1}`;
 		node.classList.add("grid-item");
 
 		const label = document.createElement("span");
@@ -52,12 +53,32 @@ function setup_dom() {
 		label.innerText = JOUR_LABELS[i];
 		node.appendChild(label);
 
+		const preview = document.createElement("img");
+		preview.classList.add("preview");
+		if (i+1 > CURRENT_JOUR) {
+			preview.src = "appIcon.png";
+			preview.style.opacity = "20%";
+		}
+		else preview.src = `covers/J${i+1}.png`;
+		preview.style.display = "block";
+		node.appendChild(preview);
+
 		const cnv = document.createElement("canvas");
-		cnv.id = `J${i+1}`;
+		cnv.style.display = "none";
 		node.appendChild(cnv);
 
 		grid.appendChild(node);
 	}
+
+	fetch("covers/configs.json")
+		.then(response => response.json())
+		.then(confs => {
+			jour_configs = confs;
+			for (let i = 1; i < JOUR_LABELS.length + 1; i++) {
+				if ("pixelated" in jour_configs[i] && jour_configs[i]["pixelated"])
+					document.getElementById(`J${i}`).classList.add("pixelated");
+			}
+		});
 }
 
 async function setup() {
@@ -69,7 +90,6 @@ async function setup() {
 			])
 		)
 	);
-	jour_configs = await fetch("covers/configs.json").then(response => response.json());
 
 	for (let jour_idx = 0; jour_idx < CURRENT_JOUR+1; jour_idx++) {
 		const jour_name = `J${jour_idx}`;
@@ -88,6 +108,7 @@ async function setup() {
 					for (let i = 0; i < CURRENT_JOUR+1; i++) {
 						let cur_audio = new Audio(audio_bloburl);
 						cur_audio.loop = true;
+						cur_audio.volume = 0.8;
 						jours[0].audio.push(cur_audio);
 					}
 
@@ -102,7 +123,7 @@ async function setup() {
 							navigator.mediaSession.playbackState = "playing";
 
 						for (let i = 1; i < CURRENT_JOUR + 1; i++) {
-							document.getElementById(`J${i}`).parentNode.classList.add("activable");
+							document.getElementById(`J${i}`).classList.add("activable");
 						}
 
 						play_el.removeEventListener("click", play_cb)
@@ -111,13 +132,10 @@ async function setup() {
 				});
 		}
 		else {
-			let cnv = document.getElementById(jour_name);
+			let cnv = document.querySelector("#" + jour_name + ">canvas");
 			cnv.width = width;
 			cnv.height = height;
 			cnv.parentNode.classList.add("enabled");
-
-			if ("pixelated" in jour_configs[jour_idx] && jour_configs[jour_idx]["pixelated"])
-				cnv.classList.add("pixelated");
 
 			let audio = new Audio(`samples/${jour_name}.mp3`);
 			audio.loop = true;
@@ -168,6 +186,9 @@ async function setup() {
 
 					drawFrame(jour_idx, jour_configs[jour_idx].base_frame);
 
+					document.querySelector("#" + jour_name + ">img").style.display = "none";
+					cnv.style.display = "block";
+
 					const click_cb = () => {
 						if (started) {
 							if (playing_idxs.length === 0)
@@ -175,7 +196,7 @@ async function setup() {
 
 							playing_idxs.push(jour_idx);
 
-							jours[0].audio.forEach(audio => audio.volume = Math.pow(1.0/playing_idxs.length, 1/2.5));
+							jours[0].audio.forEach(audio => audio.volume = 0.8*Math.pow(1.0/playing_idxs.length, 1/2.5));
 							jours[0].audio[jour_idx].play();
 
 							if (audio_start !== null) audio_start.play();
@@ -187,7 +208,7 @@ async function setup() {
 									title: parseInt(playing_idxs.join("")).toString(16),
 									album: mdata.album,
 									artist: mdata.artist,
-									artwork: mdata.artwork,
+									artwork: [{"src": `covers/${jour_name}.png`, sizes: "128x128", type:"images/png"}]
 								});
 							}
 
@@ -212,6 +233,7 @@ async function setup() {
 			title: " - ",
 			artist: "Irrational",
 			album: "Coverartober 2025",
+			artwork: [{"src": "appIcon.png", sizes: "128x128", type:"images/png"}]
 		});
 
 		navigator.mediaSession.setActionHandler("play", () => {

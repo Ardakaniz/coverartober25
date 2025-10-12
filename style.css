@@ -74,11 +74,14 @@ em {
 	color: white;
 }
 
-canvas { 
+.preview, canvas {
 	width: 256px;
 	height: 256px;
+}
+
+canvas { 
 	transition: 0.3s ease, opacity 0.8s ease;
-	display: block;
+	display: none;
 }
 
 .pixelated {
@@ -90,6 +93,7 @@ canvas {
 	font-size: 25pt;
 	display: block;
 	padding: 5px;
+	height: 38px;
 	color: black;
 }
 .grid-item>.label::before {
