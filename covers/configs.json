@@ -53,7 +53,7 @@
 	},
 	{
 		"base_frame": 30,
-		"cm": "Purples_r",
+		"cm": "RdPu",
 		"force_cycle": true
 	},
 	{
@@ -64,7 +64,7 @@
 	},
 	{
 		"base_frame": 49,
-		"cm": "RdPu",
+		"cm": "Purples_r",
 		"force_cycle": false,
 		"pixelated": true
 	},
