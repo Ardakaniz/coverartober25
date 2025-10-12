@@ -1,5 +1,6 @@
 const width = 128, height = 128, sample_count = 66; // match Python
 const CURRENT_JOUR = 12;
+const MAX_SIMULTANEOUS_SAMPLE = 8;
 const JOUR_LABELS = [
 	"digital playground",
 	"Calin",
@@ -139,6 +140,7 @@ async function setup() {
 
 			let audio = new Audio(`samples/${jour_name}.mp3`);
 			audio.loop = true;
+			audio.volume = 0;
 
 			let audio_start = null;
 			if ("has_start" in jour_configs[jour_idx] && jour_configs[jour_idx]["has_start"]) {
@@ -156,6 +158,7 @@ async function setup() {
 				img_data: img_data,
 				px_data: [],
 				audio: audio,
+				target_volume: 0.,
 			});
 
 			fetch(`covers/${jour_name}.bin`)
@@ -194,10 +197,14 @@ async function setup() {
 							if (playing_idxs.length === 0)
 								anim_frame = 0;
 
+							if (playing_idxs.length === MAX_SIMULTANEOUS_SAMPLE)
+								jours[playing_idxs.splice(0, 1)[0]].target_volume = 0;
+
 							playing_idxs.push(jour_idx);
 
 							jours[0].audio.forEach(audio => audio.volume = 0.8*Math.pow(1.0/playing_idxs.length, 1/2.5));
 							jours[0].audio[jour_idx].play();
+							jours[jour_idx].target_volume = 1;
 
 							if (audio_start !== null) audio_start.play();
 							else audio.play();
@@ -277,6 +284,16 @@ function animate() {
 	let img_idx = (anim_frame >= sample_count) ? 2 * sample_count - 2 - anim_frame : anim_frame;
 
 	playing_idxs.forEach(x => drawFrame(x, img_idx));
+	
+	for (let i = 1; i < CURRENT_JOUR + 1; i++) {
+		const tar_vol = jours[i].target_volume;
+		const cur_vol = jours[i].audio.volume;
+
+		jours[i].audio.volume += (tar_vol - cur_vol) * 0.05;
+
+		// if (tar_vol == 0 && cur_vol < 0.1)
+		// 	jours[i].audio.pause();
+	}
 
 	anim_frame = (anim_frame + 1) % (2*sample_count - 1);
 	setTimeout(() => animate(), 1/15*1000);
