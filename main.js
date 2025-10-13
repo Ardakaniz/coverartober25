@@ -1,5 +1,5 @@
 const width = 128, height = 128, sample_count = 66; // match Python
-const CURRENT_JOUR = 12;
+const CURRENT_JOUR = 13;
 const MAX_SIMULTANEOUS_SAMPLE = 8;
 const JOUR_LABELS = [
 	"digital playground",
@@ -291,19 +291,13 @@ function animate() {
 
 		jours[i].audio.volume += (tar_vol - cur_vol) * 0.05;
 
-		// if (tar_vol == 0 && cur_vol < 0.1)
-		// 	jours[i].audio.pause();
+		if (tar_vol == 0 && cur_vol < 0.1)
+			jours[i].audio.pause();
 	}
 
 	anim_frame = (anim_frame + 1) % (2*sample_count - 1);
 	setTimeout(() => animate(), 1/15*1000);
 }
-
-function toggle_audio(audio) {
-	console.log(audio);
-	if (audio.paused) audio.play();
-	else audio.pause();
-};
 
 setup_dom();
 setup();
