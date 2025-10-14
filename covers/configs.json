@@ -75,9 +75,10 @@
 		"pixelated": true
 	},
 	{
-		"base_frame": 50,
-		"cm": "Purples",
-		"force_cycle": false
+		"base_frame": 19,
+		"cm": "Pastel2",
+		"force_cycle": false,
+		"pixelated": false
 	},
 	{
 		"base_frame": 50,
