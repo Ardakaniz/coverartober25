@@ -35,7 +35,7 @@ const JOUR_LABELS = [
 	"i still love u"
 ]
 
-let colormaps = ["RdPu","Pastel1","Pastel2","hot","Spectral","magma","twilight_shifted","hsv","Purples","Purples_r","Greens","Blues","Blues_r","Greys","cividis","copper","viridis","winter","summer"];
+let colormaps = ["RdPu","Pastel2","hot","Spectral","magma","twilight_shifted","hsv","Purples","Purples_r","Greens","Blues","Blues_r","Greys","cividis","copper","viridis","winter","summer"];
 let jour_configs;
 let jours = [];
 let anim_frame = 0;
