@@ -1,0 +1,15 @@
+{
+	"name": "Coverartober 2025 - Ardakaniz",
+	"short_name": "arda-covertober25",
+	"start_url": ".",
+	"display": "standalone",
+	"background_color": "#9a78d0",
+	"description": "",
+	"icons": [
+		{
+			"src": "appIcon.png",
+			"sizes": "200x200",
+			"type": "image/png"
+		}
+	]
+}
