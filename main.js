@@ -153,9 +153,7 @@ async function setup_jour(jour_idx) {
 				}
 			}
 
-			console.log("caching " + jour_idx);
 			cache_image_data(jour_idx);
-			console.log("done " + jour_idx);
 			draw_frame(jour_idx, jour_configs[jour_idx].base_frame);
 
 			document.querySelector("#" + jour_name + ">img").style.display = "none";
@@ -323,7 +321,6 @@ async function setup() {
 	}
 
 	Promise.all([J0_promise, ...Jrest_promises]).then(_ => {
-		console.log("fnii!!");
 		document.getElementById("play").classList.remove("disabled");
 		animate();
 	});
