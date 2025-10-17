@@ -218,6 +218,7 @@ async function setup() {
 					document.querySelector("#" + jour_name + ">img").style.display = "none";
 					cnv.style.display = "block";
 
+					const play_btn = document.querySelector("#" + jour_name + ">span");
 					const click_cb = () => {
 						if (started && KERNEL_PANIC == 0) {
 							if (playing_idxs.length === 0)
@@ -269,11 +270,11 @@ async function setup() {
 							cnv.parentNode.classList.remove("activable")
 							cnv.parentNode.classList.add("activated")
 							cnv.removeEventListener("click", click_cb);
-							cnv.previousSibling.removeEventListener("click", click_cb);
+							play_btn.removeEventListener("click", click_cb);
 						}
 					};
 					cnv.addEventListener("click", click_cb);
-					document.querySelector("#" + jour_name + ">span").addEventListener("click", click_cb);
+					play_btn.addEventListener("click", click_cb);
 				})
 				.catch(() => {});
 		}
