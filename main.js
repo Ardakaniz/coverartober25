@@ -168,6 +168,8 @@ async function setup() {
 								jours[i].audio.play();
 							}
 							else classes.add("activable");
+							
+							cache_image_data(i);
 						}
 
 					}
@@ -182,6 +184,7 @@ async function setup() {
 			jours.push({
 				ctx: ctx,
 				img_data: img_data,
+				img_data_cache: [],
 				px_data: [],
 				audio: audio,
 				target_volume: 0.,
@@ -213,7 +216,8 @@ async function setup() {
 						}
 					}
 
-					drawFrame(jour_idx, jour_configs[jour_idx].base_frame);
+					cache_image_data(jour_idx);
+					draw_frame(jour_idx, jour_configs[jour_idx].base_frame);
 
 					document.querySelector("#" + jour_name + ">img").style.display = "none";
 					cnv.style.display = "block";
@@ -243,8 +247,9 @@ async function setup() {
 
 								setTimeout(() => {
 									KERNEL_PANIC = 2;
+									for (let i = 1; i <= CURRENT_JOUR; i++) cache_image_data(i);
 								}, 16670);
-								setTimeout(() => { ANIM_FPS = 100; }, 39694);
+								setTimeout(() => { ANIM_FPS = 75; }, 39694);
 
 								for (let i = 1; i <= CURRENT_JOUR; i++) {
 									jours[i].target_volume = 0;
@@ -310,23 +315,35 @@ async function setup() {
 	}
 }
 
-function drawFrame(jour_idx, frame_idx) {
+function cache_image_data(jour_idx) {
 	const jour = jours[jour_idx];
-	for (let y = 0; y < height; y++) {
-		for (let x = 0; x < width; x++) {
-			let px;
-			if (KERNEL_PANIC == 2) { px = jours[17].px_data[y][x][frame_idx]; }
-			else { px = jour.px_data[y][x][frame_idx]; };
+	jour.img_data_cache = [];
 
-			const [r,g,b] = colormaps[jour_configs[jour_idx].cm][px];
-			const index = (y*width + x)*4;
-			jour.img_data.data[index+0] = r;
-			jour.img_data.data[index+1] = g;
-			jour.img_data.data[index+2] = b;
+	for (let frame_idx = 0; frame_idx < sample_count; frame_idx++) {
+		let img_data = jour.ctx.createImageData(width, height);
+		
+		for (let y = 0; y < height; y++) {
+			for (let x = 0; x < width; x++) {
+				let px;
+				if (KERNEL_PANIC == 2) { px = jours[17].px_data[y][x][frame_idx]; }
+				else { px = jour.px_data[y][x][frame_idx]; };
+	
+				const [r,g,b] = colormaps[jour_configs[jour_idx].cm][px];
+				const index = (y*width + x)*4;
+				img_data.data[index+0] = r;
+				img_data.data[index+1] = g;
+				img_data.data[index+2] = b;
+				img_data.data[index+3] = 255;
+			}
 		}
-	}
 
-	jour.ctx.putImageData(jour.img_data, 0, 0);
+		jour.img_data_cache.push(img_data);
+	}
+}
+
+function draw_frame(jour_idx, frame_idx) {
+	const jour = jours[jour_idx];
+	jour.ctx.putImageData(jour.img_data_cache[frame_idx], 0, 0);
 }
 
 function animate() {
@@ -334,9 +351,9 @@ function animate() {
 
 	if (KERNEL_PANIC == 2) {
 		for (let i = 1; i <= 17; i++)
-			drawFrame(i, img_idx);
+			draw_frame(i, img_idx);
 	}
-	else playing_idxs.forEach(x => drawFrame(x, img_idx));
+	else playing_idxs.forEach(x => draw_frame(x, img_idx));
 	
 	for (let i = 0; i < CURRENT_JOUR + 1; i++) {
 		const tar_vol = jours[i].target_volume;
