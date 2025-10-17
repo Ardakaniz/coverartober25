@@ -36,7 +36,7 @@ const JOUR_LABELS = [
 ]
 let ANIM_FPS = 15;
 
-let colormaps = ["Dark2", "YlGnBu","RdPu","Pastel2","hot","Spectral","magma","twilight_shifted","hsv","Purples","Purples_r","Greens","Blues","Blues_r","Greys","cividis","copper","viridis","winter","summer"];
+let colormaps = ["YlGnBu","RdPu","Pastel2","hot","Spectral","magma","twilight_shifted","hsv","Purples","Purples_r","Greens","Blues","Blues_r","Greys","cividis","copper","viridis","winter","summer"];
 let jour_configs;
 let jours = [];
 let anim_frame = 0;
