@@ -90,7 +90,6 @@ async function setup_jour(jour_idx) {
 	let cnv = document.querySelector("#" + jour_name + ">canvas");
 	cnv.width = width;
 	cnv.height = height;
-	cnv.parentNode.classList.add("enabled");
 
 	let audio = new Audio(`samples/${jour_name}.mp3`);
 	audio.loop = true;
@@ -246,36 +245,20 @@ async function setup() {
 			audio: null,
 			target_volume: 0.,
 		});
+
+		document.getElementById(`J${i}`).classList.add("enabled");
 	}
 
 	const J0_promise = fetch("samples/J0.mp3")
 		.then(response => response.blob())
 		.then(URL.createObjectURL)
 		.then(audio_bloburl => {
-			for (let i = 0; i < CURRENT_JOUR+1; i++) {
+			for (let i = 0; i <= CURRENT_JOUR; i++) {
 				let cur_audio = new Audio(audio_bloburl);
 				cur_audio.loop = true;
 				cur_audio.volume = 0.8;
 				jours[0].audio.push(cur_audio);
 			}
-
-			const play_el = document.getElementById("play");
-
-			const play_cb = () => {
-				jours[0].audio[0].play();
-
-				started = true;
-
-				if ("mediaSession" in navigator) 
-					navigator.mediaSession.playbackState = "playing";
-
-				for (let i = 1; i < CURRENT_JOUR + 1; i++) {
-					document.getElementById(`J${i}`).classList.add("activable");
-				}
-
-				play_el.removeEventListener("click", play_cb)
-			}
-			play_el.addEventListener("click", play_cb);
 		});
 	//// END SETUP J0 ////
 
@@ -289,40 +272,56 @@ async function setup() {
 
 		Jrest_promises.push(setup_jour(jour_idx));
 	}
-	console.log(Jrest_promises);
 	//// END SETUP rest ////
-
-	if ("mediaSession" in navigator) {
-		navigator.mediaSession.metadata = new MediaMetadata({
-			title: " - ",
-			artist: "Irrational",
-			album: "Coverartober 2025",
-			artwork: [{"src": "appIcon.png", sizes: "128x128", type:"images/png"}]
-		});
-
-		navigator.mediaSession.setActionHandler("play", () => {
-			navigator.mediaSession.playbackState = "playing";
-
-			jours[0].audio[0].play();
-			playing_idxs.forEach(x => {
-				jours[0].audio[x].play();
-				jours[x].audio.play();
-			});
-		});
-		navigator.mediaSession.setActionHandler("pause", () => {
-			navigator.mediaSession.playbackState = "paused";
-
-			jours[0].audio[0].pause();
-			playing_idxs.forEach(x => {
-				jours[0].audio[x].pause();
-				jours[x].audio.pause();
-			});
-		});
-	}
 
 	Promise.all([J0_promise, ...Jrest_promises]).then(_ => {
 		document.getElementById("play").classList.remove("disabled");
 		animate();
+
+		const play_el = document.getElementById("play");
+		const play_cb = () => {
+			jours[0].audio[0].play();
+
+			started = true;
+
+			if ("mediaSession" in navigator) 
+				navigator.mediaSession.playbackState = "playing";
+
+			for (let i = 1; i < CURRENT_JOUR + 1; i++) {
+				document.getElementById(`J${i}`).classList.add("activable");
+			}
+
+			play_el.removeEventListener("click", play_cb)
+		}
+		play_el.addEventListener("click", play_cb);
+
+		if ("mediaSession" in navigator) {
+			navigator.mediaSession.metadata = new MediaMetadata({
+				title: " - ",
+				artist: "Irrational",
+				album: "Coverartober 2025",
+				artwork: [{"src": "appIcon.png", sizes: "128x128", type:"images/png"}]
+			});
+
+			navigator.mediaSession.setActionHandler("play", () => {
+				navigator.mediaSession.playbackState = "playing";
+
+				jours[0].audio[0].play();
+				playing_idxs.forEach(x => {
+					jours[0].audio[x].play();
+					jours[x].audio.play();
+				});
+			});
+			navigator.mediaSession.setActionHandler("pause", () => {
+				navigator.mediaSession.playbackState = "paused";
+
+				jours[0].audio[0].pause();
+				playing_idxs.forEach(x => {
+					jours[0].audio[x].pause();
+					jours[x].audio.pause();
+				});
+			});
+		}
 	});
 }
 
