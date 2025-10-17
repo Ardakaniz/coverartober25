@@ -1,5 +1,5 @@
 const width = 128, height = 128, sample_count = 66; // match Python
-const CURRENT_JOUR = 14;
+const CURRENT_JOUR = 17;
 const MAX_SIMULTANEOUS_SAMPLE = 8;
 const JOUR_LABELS = [
 	"digital playground",
@@ -34,13 +34,15 @@ const JOUR_LABELS = [
 	"crackheart",
 	"i still love u"
 ]
+let ANIM_FPS = 15;
 
-let colormaps = ["RdPu","Pastel2","hot","Spectral","magma","twilight_shifted","hsv","Purples","Purples_r","Greens","Blues","Blues_r","Greys","cividis","copper","viridis","winter","summer"];
+let colormaps = ["Dark2", "YlGnBu","RdPu","Pastel2","hot","Spectral","magma","twilight_shifted","hsv","Purples","Purples_r","Greens","Blues","Blues_r","Greys","cividis","copper","viridis","winter","summer"];
 let jour_configs;
 let jours = [];
 let anim_frame = 0;
 let started = false;
 let playing_idxs = [];
+let KERNEL_PANIC = 0;
 
 function setup_dom() {
 	const grid = document.querySelector(".grid-container");
@@ -100,6 +102,7 @@ async function setup() {
 				ctx: null,
 				px_data: [],
 				audio: [],
+				target_volume: 0.8
 			});
 
 			fetch("samples/J0.mp3")
@@ -130,6 +133,9 @@ async function setup() {
 						play_el.removeEventListener("click", play_cb)
 					}
 					play_el.addEventListener("click", play_cb);
+
+					// Once J0 sample loaded, we can start animations
+					animate();
 				});
 		}
 		else {
@@ -145,7 +151,27 @@ async function setup() {
 			let audio_start = null;
 			if ("has_start" in jour_configs[jour_idx] && jour_configs[jour_idx]["has_start"]) {
 				audio_start = new Audio(`samples/${jour_name}_start.mp3`);
-				audio_start.addEventListener("ended", () => audio.play());
+				audio_start.addEventListener("ended", () => {
+					jours[jour_idx].audio.play();
+					jours[jour_idx].target_volume = 1;
+
+					if (jour_idx === 17) {
+						KERNEL_PANIC = 0;
+						ANIM_FPS = 30;
+						jours[17].audio.volume = 0;
+						jours[17].target_volume = 1;
+
+						for (let i = 1; i <= CURRENT_JOUR; i++) {
+							const classes = document.getElementById(`J${i}`).classList;
+							if (classes.contains("activated")) {
+								jours[i].target_volume = 1;
+								jours[i].audio.play();
+							}
+							else classes.add("activable");
+						}
+
+					}
+				});
 			}
 
 			const ctx = cnv.getContext("2d");
@@ -193,7 +219,7 @@ async function setup() {
 					cnv.style.display = "block";
 
 					const click_cb = () => {
-						if (started) {
+						if (started && KERNEL_PANIC == 0) {
 							if (playing_idxs.length === 0)
 								anim_frame = 0;
 
@@ -202,12 +228,33 @@ async function setup() {
 
 							playing_idxs.push(jour_idx);
 
-							jours[0].audio.forEach(audio => audio.volume = 0.8*Math.pow(1.0/playing_idxs.length, 1/2.5));
+							jours[0].target_volume = 0.8*Math.pow(1.0/playing_idxs.length, 1/2.5);
 							jours[0].audio[jour_idx].play();
-							jours[jour_idx].target_volume = 1;
 
 							if (audio_start !== null) audio_start.play();
-							else audio.play();
+							else {
+								audio.play();
+								jours[jour_idx].target_volume = 1;
+							}
+
+							if (jour_idx === 17) {
+								KERNEL_PANIC = 1;
+
+								setTimeout(() => {
+									KERNEL_PANIC = 2;
+								}, 16670);
+								setTimeout(() => { ANIM_FPS = 100; }, 39694);
+
+								for (let i = 1; i <= CURRENT_JOUR; i++) {
+									jours[i].target_volume = 0;
+									const elem = document.getElementById(`J${i}`);
+									elem.getElementsByTagName("img")[0].style.display = "none";
+									elem.getElementsByTagName("canvas")[0].style.display = "block";
+									elem.classList.remove("activable");
+								}
+
+								jours[0].target_volume = 0;
+							}
 
 							if ("mediaSession" in navigator) {
 								const mdata = navigator.mediaSession.metadata;
@@ -232,8 +279,6 @@ async function setup() {
 		}
 		//// ////
 	}
-
-	animate();
 
 	if ("mediaSession" in navigator) {
 		navigator.mediaSession.metadata = new MediaMetadata({
@@ -268,7 +313,10 @@ function drawFrame(jour_idx, frame_idx) {
 	const jour = jours[jour_idx];
 	for (let y = 0; y < height; y++) {
 		for (let x = 0; x < width; x++) {
-			const px = jour.px_data[y][x][frame_idx];
+			let px;
+			if (KERNEL_PANIC == 2) { px = jours[17].px_data[y][x][frame_idx]; }
+			else { px = jour.px_data[y][x][frame_idx]; };
+
 			const [r,g,b] = colormaps[jour_configs[jour_idx].cm][px];
 			const index = (y*width + x)*4;
 			jour.img_data.data[index+0] = r;
@@ -283,20 +331,27 @@ function drawFrame(jour_idx, frame_idx) {
 function animate() {
 	let img_idx = (anim_frame >= sample_count) ? 2 * sample_count - 2 - anim_frame : anim_frame;
 
-	playing_idxs.forEach(x => drawFrame(x, img_idx));
+	if (KERNEL_PANIC == 2) {
+		for (let i = 1; i <= 17; i++)
+			drawFrame(i, img_idx);
+	}
+	else playing_idxs.forEach(x => drawFrame(x, img_idx));
 	
-	for (let i = 1; i < CURRENT_JOUR + 1; i++) {
+	for (let i = 0; i < CURRENT_JOUR + 1; i++) {
 		const tar_vol = jours[i].target_volume;
-		const cur_vol = jours[i].audio.volume;
+		const cur_vol = i == 0 ? jours[i].audio[0].volume : jours[i].audio.volume;
 
-		jours[i].audio.volume += (tar_vol - cur_vol) * 0.05;
+		const delta_vol = (tar_vol - cur_vol) * 0.05 * 15/ANIM_FPS;
 
-		if (tar_vol == 0 && cur_vol < 0.1)
+		if (i == 0) jours[i].audio.forEach(audio => audio.volume += delta_vol);
+		else jours[i].audio.volume += delta_vol;
+
+		if (i != 0 && tar_vol == 0 && cur_vol < 0.1)
 			jours[i].audio.pause();
 	}
 
 	anim_frame = (anim_frame + 1) % (2*sample_count - 1);
-	setTimeout(() => animate(), 1/15*1000);
+	setTimeout(() => animate(), 1/ANIM_FPS*1000);
 }
 
 setup_dom();
