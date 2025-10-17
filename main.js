@@ -84,6 +84,144 @@ function setup_dom() {
 		});
 }
 
+async function setup_jour(jour_idx) {
+	const jour_name = `J${jour_idx}`;
+
+	let cnv = document.querySelector("#" + jour_name + ">canvas");
+	cnv.width = width;
+	cnv.height = height;
+	cnv.parentNode.classList.add("enabled");
+
+	let audio = new Audio(`samples/${jour_name}.mp3`);
+	audio.loop = true;
+	audio.volume = 0;
+
+	let audio_start = null;
+	if ("has_start" in jour_configs[jour_idx] && jour_configs[jour_idx]["has_start"]) {
+		audio_start = new Audio(`samples/${jour_name}_start.mp3`);
+		audio_start.addEventListener("ended", () => {
+			jours[jour_idx].audio.play();
+			jours[jour_idx].target_volume = 1;
+
+			if (jour_idx === 17) {
+				KERNEL_PANIC = 0;
+				ANIM_FPS = 20;
+				jours[17].audio.volume = 0;
+				jours[17].target_volume = 1;
+
+				for (let i = 1; i <= CURRENT_JOUR; i++) {
+					const classes = document.getElementById(`J${i}`).classList;
+					if (classes.contains("activated")) {
+						jours[i].target_volume = 1;
+						jours[i].audio.play();
+					}
+					else classes.add("activable");
+				}
+
+			}
+		});
+	}
+
+	const ctx = cnv.getContext("2d");
+
+	jours[jour_idx].ctx = ctx;
+	jours[jour_idx].audio = audio;
+
+	await fetch(`covers/${jour_name}.bin`)
+		.then(response => response.arrayBuffer())
+		.then(buffer => {
+			const data = new Uint8Array(buffer);
+			let idx = 0;
+			let px_data = jours[jour_idx].px_data;
+
+			for(let x = 0; x < width; x++) {
+				px_data.push([]);
+				for(let y = 0; y < height; y++) {
+					px_data[x].push([]);
+					for(let f = 0; f < sample_count; f++) {
+						const px = data[idx++];
+						if (!jour_configs[jour_idx].force_cycle) {
+							px_data[x][y].push(px);
+						}
+						else if (px >= 128) {
+							px_data[x][y].push(2*(256 - px)-1);
+						}
+						else {
+							px_data[x][y].push(2*px);
+						}
+					}
+				}
+			}
+
+			console.log("caching " + jour_idx);
+			cache_image_data(jour_idx);
+			console.log("done " + jour_idx);
+			draw_frame(jour_idx, jour_configs[jour_idx].base_frame);
+
+			document.querySelector("#" + jour_name + ">img").style.display = "none";
+			cnv.style.display = "block";
+
+			const play_btn = document.querySelector("#" + jour_name + ">span");
+			const click_cb = () => {
+				if (started && KERNEL_PANIC == 0) {
+					if (playing_idxs.length === 0)
+						anim_frame = 0;
+
+					if (playing_idxs.length === MAX_SIMULTANEOUS_SAMPLE)
+						jours[playing_idxs.splice(0, 1)[0]].target_volume = 0;
+
+					playing_idxs.push(jour_idx);
+
+					jours[0].target_volume = 0.8*Math.pow(1.0/playing_idxs.length, 1/2.5);
+					jours[0].audio[jour_idx].play();
+
+					if (audio_start !== null) audio_start.play();
+					else {
+						audio.play();
+						jours[jour_idx].target_volume = 1;
+					}
+
+					if (jour_idx === 17) {
+						KERNEL_PANIC = 1;
+
+						setTimeout(() => {
+							KERNEL_PANIC = 2;
+						}, 16670);
+						setTimeout(() => { ANIM_FPS = 75; }, 39694);
+
+						for (let i = 1; i <= CURRENT_JOUR; i++) {
+							jours[i].target_volume = 0;
+							const elem = document.getElementById(`J${i}`);
+							elem.getElementsByTagName("img")[0].style.display = "none";
+							elem.getElementsByTagName("canvas")[0].style.display = "block";
+							elem.classList.remove("activable");
+						}
+
+						jours[0].target_volume = 0;
+					}
+
+					if ("mediaSession" in navigator) {
+						const mdata = navigator.mediaSession.metadata;
+						navigator.mediaSession.metadata = new MediaMetadata({
+							title: parseInt(playing_idxs.join("")).toString(16),
+							album: mdata.album,
+							artist: mdata.artist,
+							artwork: [{"src": `covers/${jour_name}.png`, sizes: "128x128", type:"images/png"}]
+						});
+					}
+
+					cnv.parentNode.classList.remove("activable")
+					cnv.parentNode.classList.add("activated")
+					cnv.removeEventListener("click", click_cb);
+					play_btn.removeEventListener("click", click_cb);
+				}
+			};
+			cnv.addEventListener("click", click_cb);
+			play_btn.addEventListener("click", click_cb);
+		})
+		.catch(() => {});
+}
+
 async function setup() {
 	colormaps = Object.fromEntries(
 		await Promise.all(
@@ -94,197 +232,67 @@ async function setup() {
 		)
 	);
 
-	for (let jour_idx = 0; jour_idx < CURRENT_JOUR+1; jour_idx++) {
-		const jour_name = `J${jour_idx}`;
-		
-		if (jour_idx === 0) {
-			jours.push({
-				ctx: null,
-				px_data: [],
-				audio: [],
-				target_volume: 0.8
-			});
+	//// SETUP J0 ////
+	jours.push({
+		ctx: null,
+		px_data: [],
+		audio: [],
+		target_volume: 0.8
+	});
 
-			fetch("samples/J0.mp3")
-				.then(response => response.blob())
-				.then(URL.createObjectURL)
-				.then(audio_bloburl => {
-					for (let i = 0; i < CURRENT_JOUR+1; i++) {
-						let cur_audio = new Audio(audio_bloburl);
-						cur_audio.loop = true;
-						cur_audio.volume = 0.8;
-						jours[0].audio.push(cur_audio);
-					}
+	for (let i = 1; i <= CURRENT_JOUR; i++) {
+		jours.push({
+			ctx: null,
+			img_data_cache: [],
+			px_data: [],
+			audio: null,
+			target_volume: 0.,
+		});
+	}
 
-					const play_el = document.getElementById("play");
-
-					const play_cb = () => {
-						jours[0].audio[0].play();
-
-						started = true;
-
-						if ("mediaSession" in navigator) 
-							navigator.mediaSession.playbackState = "playing";
-
-						for (let i = 1; i < CURRENT_JOUR + 1; i++) {
-							document.getElementById(`J${i}`).classList.add("activable");
-						}
-
-						play_el.removeEventListener("click", play_cb)
-					}
-					play_el.addEventListener("click", play_cb);
-
-					// Once J0 sample loaded, we can start animations
-					animate();
-				});
-		}
-		else {
-			let cnv = document.querySelector("#" + jour_name + ">canvas");
-			cnv.width = width;
-			cnv.height = height;
-			cnv.parentNode.classList.add("enabled");
-
-			let audio = new Audio(`samples/${jour_name}.mp3`);
-			audio.loop = true;
-			audio.volume = 0;
-
-			let audio_start = null;
-			if ("has_start" in jour_configs[jour_idx] && jour_configs[jour_idx]["has_start"]) {
-				audio_start = new Audio(`samples/${jour_name}_start.mp3`);
-				audio_start.addEventListener("ended", () => {
-					jours[jour_idx].audio.play();
-					jours[jour_idx].target_volume = 1;
-
-					if (jour_idx === 17) {
-						KERNEL_PANIC = 0;
-						ANIM_FPS = 30;
-						jours[17].audio.volume = 0;
-						jours[17].target_volume = 1;
-
-						for (let i = 1; i <= CURRENT_JOUR; i++) {
-							const classes = document.getElementById(`J${i}`).classList;
-							if (classes.contains("activated")) {
-								jours[i].target_volume = 1;
-								jours[i].audio.play();
-							}
-							else classes.add("activable");
-							
-							cache_image_data(i);
-						}
-
-					}
-				});
+	const J0_promise = fetch("samples/J0.mp3")
+		.then(response => response.blob())
+		.then(URL.createObjectURL)
+		.then(audio_bloburl => {
+			for (let i = 0; i < CURRENT_JOUR+1; i++) {
+				let cur_audio = new Audio(audio_bloburl);
+				cur_audio.loop = true;
+				cur_audio.volume = 0.8;
+				jours[0].audio.push(cur_audio);
 			}
 
-			const ctx = cnv.getContext("2d");
-			let img_data = ctx.createImageData(width, height);
-			for (let i = 3; i < img_data.data.length; i += 4)
-				img_data.data[i] = 255;
+			const play_el = document.getElementById("play");
 
-			jours.push({
-				ctx: ctx,
-				img_data: img_data,
-				img_data_cache: [],
-				px_data: [],
-				audio: audio,
-				target_volume: 0.,
-			});
+			const play_cb = () => {
+				jours[0].audio[0].play();
 
-			fetch(`covers/${jour_name}.bin`)
-				.then(response => response.arrayBuffer())
-				.then(buffer => {
-					const data = new Uint8Array(buffer);
-					let idx = 0;
-					let px_data = jours[jour_idx].px_data;
+				started = true;
 
-					for(let x = 0; x < width; x++) {
-						px_data.push([]);
-						for(let y = 0; y < height; y++) {
-							px_data[x].push([]);
-							for(let f = 0; f < sample_count; f++) {
-								const px = data[idx++];
-								if (!jour_configs[jour_idx].force_cycle) {
-									px_data[x][y].push(px);
-								}
-								else if (px >= 128) {
-									px_data[x][y].push(2*(256 - px)-1);
-								}
-								else {
-									px_data[x][y].push(2*px);
-								}
-							}
-						}
-					}
+				if ("mediaSession" in navigator) 
+					navigator.mediaSession.playbackState = "playing";
 
-					cache_image_data(jour_idx);
-					draw_frame(jour_idx, jour_configs[jour_idx].base_frame);
+				for (let i = 1; i < CURRENT_JOUR + 1; i++) {
+					document.getElementById(`J${i}`).classList.add("activable");
+				}
 
-					document.querySelector("#" + jour_name + ">img").style.display = "none";
-					cnv.style.display = "block";
+				play_el.removeEventListener("click", play_cb)
+			}
+			play_el.addEventListener("click", play_cb);
+		});
+	//// END SETUP J0 ////
 
-					const play_btn = document.querySelector("#" + jour_name + ">span");
-					const click_cb = () => {
-						if (started && KERNEL_PANIC == 0) {
-							if (playing_idxs.length === 0)
-								anim_frame = 0;
+	//// SETUP rest ////
+	await setup_jour(17); // J17 must be setup before others
 
-							if (playing_idxs.length === MAX_SIMULTANEOUS_SAMPLE)
-								jours[playing_idxs.splice(0, 1)[0]].target_volume = 0;
+	let Jrest_promises = [];
+	for (let jour_idx = 1; jour_idx <= CURRENT_JOUR; jour_idx++) {
+		if (jour_idx == 17)
+			continue;
 
-							playing_idxs.push(jour_idx);
-
-							jours[0].target_volume = 0.8*Math.pow(1.0/playing_idxs.length, 1/2.5);
-							jours[0].audio[jour_idx].play();
-
-							if (audio_start !== null) audio_start.play();
-							else {
-								audio.play();
-								jours[jour_idx].target_volume = 1;
-							}
-
-							if (jour_idx === 17) {
-								KERNEL_PANIC = 1;
-
-								setTimeout(() => {
-									KERNEL_PANIC = 2;
-									for (let i = 1; i <= CURRENT_JOUR; i++) cache_image_data(i);
-								}, 16670);
-								setTimeout(() => { ANIM_FPS = 75; }, 39694);
-
-								for (let i = 1; i <= CURRENT_JOUR; i++) {
-									jours[i].target_volume = 0;
-									const elem = document.getElementById(`J${i}`);
-									elem.getElementsByTagName("img")[0].style.display = "none";
-									elem.getElementsByTagName("canvas")[0].style.display = "block";
-									elem.classList.remove("activable");
-								}
-
-								jours[0].target_volume = 0;
-							}
-
-							if ("mediaSession" in navigator) {
-								const mdata = navigator.mediaSession.metadata;
-								navigator.mediaSession.metadata = new MediaMetadata({
-									title: parseInt(playing_idxs.join("")).toString(16),
-									album: mdata.album,
-									artist: mdata.artist,
-									artwork: [{"src": `covers/${jour_name}.png`, sizes: "128x128", type:"images/png"}]
-								});
-							}
-
-							cnv.parentNode.classList.remove("activable")
-							cnv.parentNode.classList.add("activated")
-							cnv.removeEventListener("click", click_cb);
-							play_btn.removeEventListener("click", click_cb);
-						}
-					};
-					cnv.addEventListener("click", click_cb);
-					play_btn.addEventListener("click", click_cb);
-				})
-				.catch(() => {});
-		}
-		//// ////
+		Jrest_promises.push(setup_jour(jour_idx));
 	}
+	console.log(Jrest_promises);
+	//// END SETUP rest ////
 
 	if ("mediaSession" in navigator) {
 		navigator.mediaSession.metadata = new MediaMetadata({
@@ -313,6 +321,12 @@ async function setup() {
 			});
 		});
 	}
+
+	Promise.all([J0_promise, ...Jrest_promises]).then(_ => {
+		console.log("fnii!!");
+		document.getElementById("play").classList.remove("disabled");
+		animate();
+	});
 }
 
 function cache_image_data(jour_idx) {
@@ -321,40 +335,50 @@ function cache_image_data(jour_idx) {
 
 	for (let frame_idx = 0; frame_idx < sample_count; frame_idx++) {
 		let img_data = jour.ctx.createImageData(width, height);
+		let img_data_panic = jour.ctx.createImageData(width, height);
 		
 		for (let y = 0; y < height; y++) {
 			for (let x = 0; x < width; x++) {
-				let px;
-				if (KERNEL_PANIC == 2) { px = jours[17].px_data[y][x][frame_idx]; }
-				else { px = jour.px_data[y][x][frame_idx]; };
-	
-				const [r,g,b] = colormaps[jour_configs[jour_idx].cm][px];
+				const px = jour.px_data[y][x][frame_idx];
+				const px_panic = jours[17].px_data[y][x][frame_idx];
 				const index = (y*width + x)*4;
+	
+				const cm = colormaps[jour_configs[jour_idx].cm];
+
+				const [r,g,b] = cm[px];
 				img_data.data[index+0] = r;
 				img_data.data[index+1] = g;
 				img_data.data[index+2] = b;
 				img_data.data[index+3] = 255;
+
+				const [r_,g_,b_] = cm[px_panic];
+				img_data_panic.data[index+0] = r_;
+				img_data_panic.data[index+1] = g_;
+				img_data_panic.data[index+2] = b_;
+				img_data_panic.data[index+3] = 255;
 			}
 		}
 
-		jour.img_data_cache.push(img_data);
+		jour.img_data_cache.push([img_data, img_data_panic]);
 	}
 }
 
 function draw_frame(jour_idx, frame_idx) {
 	const jour = jours[jour_idx];
-	jour.ctx.putImageData(jour.img_data_cache[frame_idx], 0, 0);
+	const frame = KERNEL_PANIC == 2 ? jour.img_data_cache[frame_idx][1] : jour.img_data_cache[frame_idx][0];
+	jour.ctx.putImageData(frame, 0, 0);
 }
 
 function animate() {
 	let img_idx = (anim_frame >= sample_count) ? 2 * sample_count - 2 - anim_frame : anim_frame;
 
 	if (KERNEL_PANIC == 2) {
-		for (let i = 1; i <= 17; i++)
+		for (let i = 1; i <= CURRENT_JOUR; i++)
 			draw_frame(i, img_idx);
 	}
 	else playing_idxs.forEach(x => draw_frame(x, img_idx));
 	
+	//// AUDIO FADING ////
 	for (let i = 0; i < CURRENT_JOUR + 1; i++) {
 		const tar_vol = jours[i].target_volume;
 		const cur_vol = i == 0 ? jours[i].audio[0].volume : jours[i].audio.volume;
@@ -367,6 +391,7 @@ function animate() {
 		if (i != 0 && tar_vol == 0 && cur_vol < 0.1)
 			jours[i].audio.pause();
 	}
+	//// ////
 
 	anim_frame = (anim_frame + 1) % (2*sample_count - 1);
 	setTimeout(() => animate(), 1/ANIM_FPS*1000);

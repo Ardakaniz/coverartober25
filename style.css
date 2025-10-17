@@ -61,6 +61,11 @@ a:hover {
 	width: 256px;
 }
 
+.disabled, .disabled:hover  {
+	color: #aaa !important;
+	cursor: not-allowed !important;
+}
+
 strong {
 	color: #9a78d0;
 	font-weight: normal; 
@@ -96,7 +101,7 @@ canvas {
 	height: 38px;
 	color: black;
 }
-.grid-item>.label::before {
+.grid-item>.label:not(.disabled)::before {
 	content: "▶ ";
 	font-size: 15pt;
 	color: #433160;
