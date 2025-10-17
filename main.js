@@ -275,10 +275,11 @@ async function setup() {
 	//// END SETUP rest ////
 
 	Promise.all([J0_promise, ...Jrest_promises]).then(_ => {
-		document.getElementById("play").classList.remove("disabled");
+		const play_el = document.getElementById("play");
+		play_el.innerText = "play";
+		play_el.classList.remove("disabled");
 		animate();
 
-		const play_el = document.getElementById("play");
 		const play_cb = () => {
 			jours[0].audio[0].play();
 
