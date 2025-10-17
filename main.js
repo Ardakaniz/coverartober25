@@ -183,8 +183,8 @@ async function setup_jour(jour_idx) {
 
 						setTimeout(() => {
 							KERNEL_PANIC = 2;
-						}, 16670);
-						setTimeout(() => { ANIM_FPS = 75; }, 39694);
+						}, 16690);
+						setTimeout(() => { ANIM_FPS = 75; }, 39705);
 
 						for (let i = 1; i <= CURRENT_JOUR; i++) {
 							jours[i].target_volume = 0;
