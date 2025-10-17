@@ -101,7 +101,8 @@ canvas {
 	height: 38px;
 	color: black;
 }
-.grid-item>.label:not(.disabled)::before {
+
+.label:not(.disabled)::before {
 	content: "▶ ";
 	font-size: 15pt;
 	color: #433160;
